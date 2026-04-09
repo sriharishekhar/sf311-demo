@@ -468,6 +468,7 @@ export default function SF311Demo() {
   const dataRef = useFadeInSection();
   const playgroundRef = useFadeInSection();
   const textSqlRef = useFadeInSection();
+  const biggerRef = useFadeInSection();
 
   const a = ANALYSES[activeAnalysis];
 
@@ -876,6 +877,27 @@ export default function SF311Demo() {
               )}
             </div>
           )}
+        </div>
+      </section>
+
+      {/* ===== BIGGER PICTURE ===== */}
+      <section style={sec(false)} ref={biggerRef}>
+        <div style={inner}>
+          <h2 style={{ fontSize: 32, fontWeight: 700, color: C.navy, marginBottom: 8, letterSpacing: -0.5 }}>AI Functions expand the class of questions SQL can answer</h2>
+          <p style={{ fontSize: 15, color: C.grayDark, marginBottom: 10, lineHeight: 1.6, maxWidth: 700 }}>Traditional SQL answers: How many? Which ones? When? Where?</p>
+          <p style={{ fontSize: 15, color: C.ice, marginBottom: 32, lineHeight: 1.6, fontWeight: 600 }}>AI SQL adds: What kind? How severe? What does it mean? What is the pattern across all of these?</p>
+          <div className="two-col-grid">
+            {INDUSTRIES.map((ind, i) => (
+              <div key={i} style={{ background: "#fff", borderRadius: 14, padding: 22, border: "1px solid #e2e8f0", position: "relative", overflow: "hidden" }}>
+                <div style={{ position: "absolute", top: 0, left: 0, right: 0, height: 3, background: `linear-gradient(90deg, ${C.ice}, ${C.cyan})` }} />
+                <div style={{ fontSize: 24, marginBottom: 8 }}>{ind.icon}</div>
+                <div style={{ fontSize: 14.5, fontWeight: 700, color: C.navy, marginBottom: 8 }}>{ind.name}</div>
+                <div style={{ fontSize: 13, color: C.grayDark, lineHeight: 1.6, marginBottom: 12, fontStyle: "italic" }}>"{ind.question}"</div>
+                <div style={{ fontSize: 10.5, color: C.ice, fontFamily: "monospace", marginBottom: 10, background: "rgba(41,182,246,0.04)", padding: "7px 10px", borderRadius: 6, lineHeight: 1.5 }}>{ind.functions}</div>
+                <div style={{ fontSize: 10.5, color: C.gray }}><span style={{ textDecoration: "line-through" }}>Previously: {ind.before}</span></div>
+              </div>
+            ))}
+          </div>
         </div>
       </section>
 
