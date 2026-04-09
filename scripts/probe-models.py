@@ -3,9 +3,13 @@ import os, snowflake.connector, warnings
 warnings.filterwarnings("ignore")
 
 conn = snowflake.connector.connect(
-    account="JXFAAZN-TDB41070", user="SRIHARISHEKHAR",
-    private_key_file=os.path.expanduser("~/sf311-demo/keys/snowflake_rsa_key.p8"),
-    database="SF311_DEMO", schema="ANALYTICS", warehouse="COMPUTE_WH", role="ACCOUNTADMIN",
+    account=os.environ["SNOWFLAKE_ACCOUNT"],
+    user=os.environ["SNOWFLAKE_USERNAME"],
+    private_key_file=os.path.expanduser(os.environ.get("SNOWFLAKE_PRIVATE_KEY_PATH", "~/sf311-demo/keys/snowflake_rsa_key.p8")),
+    database=os.environ.get("SNOWFLAKE_DATABASE", "SF311_DEMO"),
+    schema=os.environ.get("SNOWFLAKE_SCHEMA", "ANALYTICS"),
+    warehouse=os.environ.get("SNOWFLAKE_WAREHOUSE", "COMPUTE_WH"),
+    role=os.environ.get("SNOWFLAKE_ROLE", "ACCOUNTADMIN"),
 )
 cur = conn.cursor()
 

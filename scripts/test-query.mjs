@@ -4,14 +4,14 @@ import fs from "fs";
 snowflake.configure({ logLevel: "ERROR" });
 
 const connection = snowflake.createConnection({
-  account: "JXFAAZN-TDB41070",
-  username: "SRIHARISHEKHAR",
+  account: process.env.SNOWFLAKE_ACCOUNT,
+  username: process.env.SNOWFLAKE_USERNAME,
   authenticator: "SNOWFLAKE_JWT",
-  privateKey: fs.readFileSync("/Users/sriharishekhar/sf311-demo/keys/snowflake_rsa_key.p8", "utf8"),
-  database: "SF311_DEMO",
-  schema: "ANALYTICS",
-  warehouse: "COMPUTE_WH",
-  role: "ACCOUNTADMIN",
+  privateKey: fs.readFileSync(process.env.SNOWFLAKE_PRIVATE_KEY_PATH ?? "/Users/sriharishekhar/sf311-demo/keys/snowflake_rsa_key.p8", "utf8"),
+  database: process.env.SNOWFLAKE_DATABASE ?? "SF311_DEMO",
+  schema: process.env.SNOWFLAKE_SCHEMA ?? "ANALYTICS",
+  warehouse: process.env.SNOWFLAKE_WAREHOUSE ?? "COMPUTE_WH",
+  role: process.env.SNOWFLAKE_ROLE ?? "ACCOUNTADMIN",
 });
 
 connection.connect((err) => {
