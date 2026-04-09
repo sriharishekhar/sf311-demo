@@ -282,28 +282,28 @@ const INDUSTRIES = [
   {
     icon: "🏦",
     name: "Financial Services",
-    question: "Which holdings have positive P&L but negative sentiment in earnings calls, confirmed by chart pattern decline?",
+    question: "Which holdings have positive P&L but negative earnings call sentiment, confirmed by chart patterns?",
     functions: "AI_SENTIMENT on transcripts + AI_COMPLETE on chart images + structured positions",
     before: "Quant team + NLP pipeline + image analysis vendor",
   },
   {
     icon: "🏥",
     name: "Healthcare",
-    question: "Find patients where clinical notes say improving but radiology images show disease progression.",
+    question: "Patients where notes say improving but radiology images show disease progression.",
     functions: "AI_FILTER on notes + AI_CLASSIFY on imaging + structured records",
     before: "Clinical informatics + radiology AI vendor + custom integration",
   },
   {
     icon: "🛡️",
     name: "Insurance",
-    question: "Flag claims where photo damage severity does not match the claimed amount, ranked by discrepancy.",
+    question: "Claims where photo damage severity does not match the claimed amount, ranked by gap.",
     functions: "AI_COMPLETE (severity from image) + structured claims + AI_FILTER",
     before: "SIU team manually reviewing every photo",
   },
   {
     icon: "🛒",
     name: "Retail",
-    question: "Products with high returns where reviews say looks different and user photos confirm a listing mismatch.",
+    question: "High-return products where reviews and user photos both confirm a listing mismatch.",
     functions: "AI_FILTER on reviews + AI_CLASSIFY on photos vs listing",
     before: "Review NLP + image comparison pipeline + manual QA",
   },
@@ -458,6 +458,8 @@ export default function SF311Demo() {
 
   const [queryResultsExpanded, setQueryResultsExpanded] = useState(false);
   const [textResultsExpanded, setTextResultsExpanded] = useState(false);
+  const [querySlow, setQuerySlow] = useState(false);
+  const [textSlow, setTextSlow] = useState(false);
 
   const [stats, setStats] = useState<Record<string, string> | null>(null);
   const [previewData, setPreviewData] = useState<SampleRow[]>(SAMPLE_DATA);
@@ -467,7 +469,6 @@ export default function SF311Demo() {
   const playgroundRef = useFadeInSection();
   const textSqlRef = useFadeInSection();
   const biggerRef = useFadeInSection();
-  const nextRef = useFadeInSection();
 
   const a = ANALYSES[activeAnalysis];
 
@@ -480,7 +481,9 @@ export default function SF311Demo() {
     setQueryRunning(true);
     setQueryDone(false);
     setQueryResults(null);
+    setQuerySlow(false);
     setTimeout(() => resultsRef.current?.scrollIntoView({ behavior: "smooth", block: "nearest" }), 80);
+    const slowTimer = setTimeout(() => setQuerySlow(true), 10000);
     try {
       const res = await fetch("/api/query", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ id: a.id }) });
       const data = await res.json();
@@ -490,6 +493,8 @@ export default function SF311Demo() {
       setQueryResults(a.results as unknown as Record<string, unknown>[]);
       setQueryTime("2.3");
     }
+    clearTimeout(slowTimer);
+    setQuerySlow(false);
     setQueryRunning(false);
     setQueryDone(true);
   }, [a]);
@@ -505,6 +510,8 @@ export default function SF311Demo() {
     setTextDone(false);
     setTextStep(0);
     setTextResultsExpanded(false);
+    setTextSlow(false);
+    const slowTimer = setTimeout(() => setTextSlow(true), 10000);
     const apiPromise = fetch("/api/text-to-sql", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ question }) }).then((r) => r.json()).catch(() => null);
     let step = 0;
     const iv = setInterval(() => {
@@ -521,6 +528,8 @@ export default function SF311Demo() {
             }
           }
           setTextStep(5);
+          clearTimeout(slowTimer);
+          setTextSlow(false);
           setTimeout(() => { setTextRunning(false); setTextDone(true); }, 600);
         });
       }
@@ -549,9 +558,10 @@ export default function SF311Demo() {
       <section style={{ minHeight: "100vh", display: "flex", flexDirection: "column", justifyContent: "center", padding: "60px 40px", position: "relative", overflow: "hidden", background: `radial-gradient(ellipse at 25% 15%, ${C.navyMid} 0%, ${C.navy} 70%)` }}>
         <div style={{ position: "absolute", inset: 0, opacity: 0.03, backgroundImage: `repeating-linear-gradient(0deg, transparent, transparent 59px, ${C.ice} 59px, ${C.ice} 60px), repeating-linear-gradient(90deg, transparent, transparent 59px, ${C.ice} 59px, ${C.ice} 60px)` }} />
         <div style={inner}>
+          <div style={{ fontSize: 11, color: C.grayDark, letterSpacing: 1.2, textTransform: "uppercase", marginBottom: 16 }}>Built for the Cortex AI Functions PM role</div>
           <Badge color={C.cyan}>Live Demo · Snowflake Cortex AI Functions</Badge>
           <h1 style={{ fontSize: 52, fontWeight: 700, lineHeight: 1.1, marginTop: 24, marginBottom: 20, letterSpacing: -1.5, maxWidth: 800, background: `linear-gradient(135deg, ${C.white} 0%, ${C.ice} 100%)`, WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}>
-            SQL used to answer structured questions. Now it can read images, understand text, and classify anything.
+            What happens when SQL can see images, read text, and classify data on its own?
           </h1>
           <p style={{ fontSize: 17, color: C.gray, maxWidth: 620, lineHeight: 1.75, marginBottom: 32 }}>
             This is a working demo of Snowflake Cortex AI Functions. It shows how any analyst can run AI classification, sentiment analysis, and image understanding directly in SQL. Every query on this page executes live against my Snowflake account with real SF 311 data.
@@ -568,10 +578,7 @@ export default function SF311Demo() {
               </li>
             ))}
           </ul>
-          <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
-            <div style={{ fontSize: 12, color: C.grayDark, letterSpacing: 0.5 }}>Built by Srihari Shekhar</div>
-            <div style={{ fontSize: 11, color: C.grayDark, letterSpacing: 1.2, textTransform: "uppercase" }}>Built for the Cortex AI Functions PM role</div>
-          </div>
+          <div style={{ fontSize: 12, color: C.grayDark, letterSpacing: 0.5 }}>Built by Srihari Shekhar</div>
         </div>
       </section>
 
@@ -720,8 +727,8 @@ export default function SF311Demo() {
                 {queryRunning && (
                   <div ref={resultsRef} style={{ marginTop: 14, borderRadius: 8, overflow: "hidden" }}>
                     <div style={{ height: 4, background: `linear-gradient(90deg, transparent, ${C.ice}, transparent)`, backgroundSize: "200% 100%", animation: "shimmer 1.4s infinite" }} />
-                    <div style={{ padding: "12px 14px", background: "rgba(41,182,246,0.04)", border: `1px solid rgba(41,182,246,0.1)`, borderTop: "none", borderRadius: "0 0 8px 8px", fontSize: 12.5, color: C.ice }}>
-                      Connecting to Snowflake, executing AI functions, assembling results...
+                    <div style={{ padding: "12px 14px", background: "rgba(41,182,246,0.04)", border: `1px solid rgba(41,182,246,0.1)`, borderTop: "none", borderRadius: "0 0 8px 8px", fontSize: 12.5, color: querySlow ? C.amber : C.ice }}>
+                      {querySlow ? "Query is taking longer than expected — Snowflake is still running..." : "Connecting to Snowflake, executing AI functions, assembling results..."}
                     </div>
                   </div>
                 )}
@@ -779,34 +786,33 @@ export default function SF311Demo() {
       {/* ===== TEXT TO AI SQL ===== */}
       <section style={sec(true)} ref={textSqlRef}>
         <div style={inner}>
-          <SectionTag>The Next Evolution</SectionTag>
-          <h2 style={{ fontSize: 32, fontWeight: 700, color: C.white, marginBottom: 8, letterSpacing: -0.5 }}>Text to AI SQL</h2>
+          <SectionTag>Text to AI SQL</SectionTag>
+          <h2 style={{ fontSize: 32, fontWeight: 700, color: C.white, marginBottom: 8, letterSpacing: -0.5 }}>Ask a question. Get a live SQL result.</h2>
           <p style={{ fontSize: 15, color: C.gray, marginBottom: 14, lineHeight: 1.7, maxWidth: 700 }}>
             You have seen the SQL. Now you do not even need to write it. Type a question, the system identifies what you are asking for, selects the right query, and runs it against Snowflake.
           </p>
-          <div style={{ marginBottom: 24, padding: "10px 16px", background: "rgba(255,171,64,0.06)", border: "1px solid rgba(255,171,64,0.2)", borderRadius: 8, maxWidth: 700 }}>
-            <span style={{ fontSize: 12, color: C.amber, fontWeight: 600 }}>Demo note: </span>
-            <span style={{ fontSize: 12, color: C.gray, lineHeight: 1.6 }}>This demo uses keyword matching to route questions to pre-written SQL templates. In production you would use a Cortex LLM like <span style={{ color: C.grayLight, fontFamily: "monospace" }}>SNOWFLAKE.CORTEX.COMPLETE('mistral-large2', ...)</span> to generate SQL directly from natural language with no hardcoded templates.</span>
-          </div>
+          <p style={{ fontSize: 11, color: C.grayDark, marginBottom: 20, lineHeight: 1.6, maxWidth: 700 }}>
+            This demo routes questions to optimized SQL templates. In production, a Cortex LLM like <span style={{ fontFamily: "monospace", color: C.gray }}>COMPLETE('mistral-large2', ...)</span> would generate SQL directly from any question.
+          </p>
 
           <div style={{ background: C.surface, borderRadius: 14, padding: 22, border: "1px solid rgba(41,182,246,0.1)", marginBottom: 18 }}>
-            <div style={{ display: "flex", gap: 12 }}>
-              <input value={textInput} onChange={(e) => setTextInput(e.target.value)} onKeyDown={(e) => e.key === "Enter" && runTextToSql()}
-                placeholder="Ask a question about SF 311 data..."
-                style={{ flex: 1, padding: "12px 16px", borderRadius: 10, border: `1.5px solid ${C.navyMid}`, background: C.navyLight, color: C.white, fontSize: 14, outline: "none", fontFamily: "inherit" }} />
-              <button onClick={() => runTextToSql()} disabled={textRunning || !textInput}
-                style={{ padding: "12px 24px", borderRadius: 10, border: "none", background: textRunning ? C.grayDark : `linear-gradient(135deg, ${C.cyan}, ${C.ice})`, color: C.navy, fontWeight: 700, fontSize: 13, cursor: textRunning ? "wait" : "pointer", fontFamily: "inherit", whiteSpace: "nowrap" }}>
-                {textRunning ? "Processing..." : "Ask"}
-              </button>
+            <div style={{ fontSize: 11, color: C.grayDark, marginBottom: 10, letterSpacing: 0.5 }}>Select a question to run</div>
+            <div style={{ display: "flex", gap: 6, flexWrap: "wrap", marginBottom: 14 }}>
+              {TEXT_TO_SQL_EXAMPLES.map((q, i) => {
+                const selected = textInput === q;
+                return (
+                  <button key={i} onClick={() => { setTextInput(q); if (!textRunning) runTextToSql(q); }}
+                    style={{ padding: "7px 14px", borderRadius: 20, border: `1.5px solid ${selected ? C.ice : "rgba(41,182,246,0.18)"}`, background: selected ? "rgba(41,182,246,0.12)" : "rgba(41,182,246,0.04)", color: selected ? C.white : C.ice, fontSize: 12, cursor: textRunning ? "wait" : "pointer", fontFamily: "inherit", fontWeight: selected ? 600 : 400, transition: "all 0.15s" }}>
+                    {q}
+                  </button>
+                );
+              })}
             </div>
-            <div style={{ marginTop: 10, display: "flex", gap: 6, flexWrap: "wrap" }}>
-              {TEXT_TO_SQL_EXAMPLES.map((q, i) => (
-                <button key={i} onClick={() => runTextToSql(q)}
-                  style={{ padding: "5px 12px", borderRadius: 20, border: "1px solid rgba(41,182,246,0.18)", background: "rgba(41,182,246,0.05)", color: C.ice, fontSize: 11.5, cursor: "pointer", fontFamily: "inherit" }}>
-                  {q}
-                </button>
-              ))}
-            </div>
+            {textInput && (
+              <div style={{ padding: "10px 14px", borderRadius: 8, background: C.navyLight, border: `1px solid rgba(41,182,246,0.15)`, fontSize: 13, color: C.grayLight, fontStyle: "italic" }}>
+                "{textInput}"
+              </div>
+            )}
           </div>
 
           {(textRunning || textDone) && textAnalysis && (
@@ -821,6 +827,11 @@ export default function SF311Demo() {
               {textStep >= 3 && (
                 <div style={{ marginLeft: 40, marginBottom: 8, marginTop: 4 }}>
                   <CodeBlock code={textApiResult?.sql ?? textAnalysis.aiSql} accent />
+                </div>
+              )}
+              {textSlow && textRunning && (
+                <div style={{ marginLeft: 40, padding: "7px 12px", background: "rgba(255,171,64,0.06)", border: "1px solid rgba(255,171,64,0.2)", borderRadius: 7, fontSize: 12, color: C.amber, marginBottom: 8 }}>
+                  Query is taking longer than expected — Snowflake is still running...
                 </div>
               )}
               <ProcessStep label="Executing against Snowflake..."
@@ -892,36 +903,15 @@ export default function SF311Demo() {
         </div>
       </section>
 
-      {/* ===== WHAT'S NEXT ===== */}
-      <section style={sec(true)} ref={nextRef}>
-        <div style={inner}>
-          <SectionTag>Product Thinking</SectionTag>
-          <h2 style={{ fontSize: 32, fontWeight: 700, color: C.white, marginBottom: 24, letterSpacing: -0.5 }}>Where Cortex AI Functions go next</h2>
-          <div className="two-col-grid">
-            {[
-              { t: "Streaming AI Enrichment", d: "Dynamic tables with AI Functions for real-time classification as data arrives. No batch jobs required." },
-              { t: "Cross-Table AI Joins", d: "AI_SIMILARITY to join records across tables without shared keys, using semantic meaning instead." },
-              { t: "AI Function Chaining", d: "Composable pipelines where CLASSIFY feeds into FILTER feeds into SUMMARIZE, all in one query at optimizer-level efficiency." },
-              { t: "Text to AI SQL in Snowsight", d: "Natural language query interface in the worksheet that generates AI SQL, accessible to every analyst without engineering support." },
-            ].map((idea, i) => (
-              <div key={i} style={{ background: C.surface, borderRadius: 12, padding: 20, border: "1px solid rgba(41,182,246,0.08)" }}>
-                <div style={{ fontSize: 14, fontWeight: 700, color: C.ice, marginBottom: 7 }}>{idea.t}</div>
-                <div style={{ fontSize: 12.5, color: C.gray, lineHeight: 1.6 }}>{idea.d}</div>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
       {/* ===== FOOTER ===== */}
-      <footer style={{ padding: "32px 40px", background: C.navy, borderTop: "1px solid rgba(41,182,246,0.08)", textAlign: "center" }}>
-        <div style={{ fontSize: 13, color: C.grayDark, marginBottom: 6 }}>
+      <footer style={{ padding: "28px 40px", background: C.navy, borderTop: "1px solid rgba(41,182,246,0.08)", textAlign: "center" }}>
+        <div style={{ fontSize: 12, color: C.grayDark }}>
           Built by{" "}
           <a href="https://www.linkedin.com/in/sriharishekhar" target="_blank" rel="noopener noreferrer" style={{ color: C.ice, textDecoration: "none" }}>
             Srihari Shekhar
           </a>
+          {" "}· Snowflake Cortex AI Functions · Next.js · Vercel · All queries execute live ❄️
         </div>
-        <div style={{ fontSize: 12, color: C.grayDark }}>Built with Snowflake Cortex AI Functions, Next.js, and Vercel. All queries execute live. ❄️</div>
       </footer>
 
       <style>{`
@@ -955,7 +945,7 @@ function ProblemSection({ sec, inner }: { sec: (dark: boolean) => React.CSSPrope
       <div style={inner}>
         <SectionTag>The Problem</SectionTag>
         <h2 style={{ fontSize: 32, fontWeight: 700, color: C.navy, marginBottom: 8, letterSpacing: -0.5 }}>The same analysis. Two very different approaches.</h2>
-        <p style={{ fontSize: 15, color: C.grayDark, marginBottom: 32, maxWidth: 650, lineHeight: 1.6 }}>Combining structured data with unstructured text and images used to require multiple tools, API integrations, and engineering time. Cortex AI Functions collapse all of that into a single SQL query.</p>
+        <p style={{ fontSize: 15, color: C.grayDark, marginBottom: 32, maxWidth: 650, lineHeight: 1.6 }}>Getting AI insights from text and images alongside your structured data used to mean Python scripts, external APIs, and engineering time. Cortex AI Functions make it a SQL query.</p>
         <div className="two-col-grid">
           <div style={{ background: "#fff", borderRadius: 14, padding: 24, border: "1px solid #e2e8f0" }}>
             <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 18 }}>
