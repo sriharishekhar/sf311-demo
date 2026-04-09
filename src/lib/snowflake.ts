@@ -4,9 +4,13 @@ import fs from "fs";
 snowflake.configure({ logLevel: "ERROR" });
 
 function getPrivateKey(): string {
+  // Vercel: key content stored directly in env var
+  const keyContent = process.env.SNOWFLAKE_PRIVATE_KEY;
+  if (keyContent) return keyContent.replace(/\\n/g, "\n");
+  // Local dev: read from file path
   const path = process.env.SNOWFLAKE_PRIVATE_KEY_PATH;
-  if (!path) throw new Error("SNOWFLAKE_PRIVATE_KEY_PATH not set");
-  return fs.readFileSync(path, "utf8");
+  if (path) return fs.readFileSync(path, "utf8");
+  throw new Error("Neither SNOWFLAKE_PRIVATE_KEY nor SNOWFLAKE_PRIVATE_KEY_PATH is set");
 }
 
 export async function executeQuery(
