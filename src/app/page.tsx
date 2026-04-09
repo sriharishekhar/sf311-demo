@@ -558,17 +558,16 @@ export default function SF311Demo() {
       <section style={{ minHeight: "100vh", display: "flex", flexDirection: "column", justifyContent: "center", padding: "60px 40px", position: "relative", overflow: "hidden", background: `radial-gradient(ellipse at 25% 15%, ${C.navyMid} 0%, ${C.navy} 70%)` }}>
         <div style={{ position: "absolute", inset: 0, opacity: 0.03, backgroundImage: `repeating-linear-gradient(0deg, transparent, transparent 59px, ${C.ice} 59px, ${C.ice} 60px), repeating-linear-gradient(90deg, transparent, transparent 59px, ${C.ice} 59px, ${C.ice} 60px)` }} />
         <div style={inner}>
-          <div style={{ fontSize: 11, color: C.grayDark, letterSpacing: 1.2, textTransform: "uppercase", marginBottom: 16 }}>Built for the Cortex AI Functions PM role</div>
           <Badge color={C.cyan}>Live Demo · Snowflake Cortex AI Functions</Badge>
           <h1 style={{ fontSize: 52, fontWeight: 700, lineHeight: 1.1, marginTop: 24, marginBottom: 20, letterSpacing: -1.5, maxWidth: 800, background: `linear-gradient(135deg, ${C.white} 0%, ${C.ice} 100%)`, WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}>
-            What happens when SQL can see images, read text, and classify data on its own?
+            SQL that can see images, read text, and classify data — without leaving your warehouse.
           </h1>
           <p style={{ fontSize: 17, color: C.gray, maxWidth: 620, lineHeight: 1.75, marginBottom: 32 }}>
-            This is a working demo of Snowflake Cortex AI Functions. It shows how any analyst can run AI classification, sentiment analysis, and image understanding directly in SQL. Every query on this page executes live against my Snowflake account with real SF 311 data.
+            Cortex AI Functions let any analyst run image analysis, sentiment scoring, and classification directly in SQL — no Python, no external APIs. Every query on this page executes live against a real SF 311 dataset as an example use case.
           </p>
           <ul style={{ listStyle: "none", padding: 0, margin: "0 0 48px 0", display: "flex", flexDirection: "column", gap: 8 }}>
             {[
-              "A real SF 311 dataset with complaint text and resident photos",
+              "A real SF 311 dataset with complaint text and representative photos",
               "Side by side comparison of the old Python workflow vs one SQL query",
               "Live AI SQL queries executing against Snowflake",
               "A natural language to SQL translation prototype",
@@ -792,7 +791,7 @@ export default function SF311Demo() {
             You have seen the SQL. Now you do not even need to write it. Type a question, the system identifies what you are asking for, selects the right query, and runs it against Snowflake.
           </p>
           <p style={{ fontSize: 11, color: C.grayDark, marginBottom: 20, lineHeight: 1.6, maxWidth: 700 }}>
-            This demo routes questions to optimized SQL templates. In production, a Cortex LLM like <span style={{ fontFamily: "monospace", color: C.gray }}>COMPLETE('mistral-large2', ...)</span> would generate SQL directly from any question.
+            This demo routes questions to optimized SQL templates. In production, a Cortex LLM like <span style={{ fontFamily: "monospace", color: C.gray }}>COMPLETE('mistral-large2', ...)</span> could generate SQL directly from any question.
           </p>
 
           <div style={{ background: C.surface, borderRadius: 14, padding: 22, border: "1px solid rgba(41,182,246,0.1)", marginBottom: 18 }}>
@@ -905,12 +904,12 @@ export default function SF311Demo() {
 
       {/* ===== FOOTER ===== */}
       <footer style={{ padding: "28px 40px", background: C.navy, borderTop: "1px solid rgba(41,182,246,0.08)", textAlign: "center" }}>
-        <div style={{ fontSize: 12, color: C.grayDark }}>
-          Built by{" "}
-          <a href="https://www.linkedin.com/in/sriharishekhar" target="_blank" rel="noopener noreferrer" style={{ color: C.ice, textDecoration: "none" }}>
-            Srihari Shekhar
+        <div style={{ fontSize: 12, color: C.grayDark, display: "flex", alignItems: "center", justifyContent: "center", gap: 10 }}>
+          <span>Built by Srihari Shekhar</span>
+          <a href="https://www.linkedin.com/in/srihari-shekhar/" target="_blank" rel="noopener noreferrer" title="LinkedIn" style={{ display: "flex", alignItems: "center", color: C.ice, textDecoration: "none" }}>
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433a2.062 2.062 0 0 1-2.063-2.065 2.064 2.064 0 1 1 2.063 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/></svg>
           </a>
-          {" "}· Snowflake Cortex AI Functions · Next.js · Vercel · All queries execute live ❄️
+          <span>· All queries execute live ❄️</span>
         </div>
       </footer>
 
