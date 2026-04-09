@@ -17,7 +17,7 @@ export async function GET() {
         COALESCE(ai_severity_gap, 0) AS gap
       FROM cases_enriched
       ORDER BY opened DESC
-      LIMIT 20
+      LIMIT 100
     `);
 
     // Normalize keys to lowercase

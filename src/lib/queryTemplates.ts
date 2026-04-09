@@ -72,13 +72,14 @@ ORDER BY
   LEFT(description, 120) AS description,
   ai_image_severity,
   ai_severity_gap,
-  LEFT(ai_cross_summary, 150) AS assessment
+  LEFT(ai_image_description, 150) AS assessment
 FROM cases_enriched
-WHERE ai_cross_summary IS NOT NULL
+WHERE has_photo = TRUE
+  AND ai_image_severity IS NOT NULL
   AND (ai_image_severity >= 4 OR ai_severity_gap > 1)
 ORDER BY ai_image_severity DESC NULLS LAST
 LIMIT 25`,
-    functions: ["AI_FILTER (text)", "AI_FILTER (image)", "AI_COMPLETE (cross-modal)"],
+    functions: ["AI_COMPLETE (image severity)", "AI_COMPLETE (image description)", "Severity threshold filter"],
     fallbackResults: [
       { caseid: 14892210, district: "5", neighborhood: "Haight", category: "Tree Maintenance", description: "Large branch cracked and hanging over playground", ai_image_severity: 5, ai_severity_gap: 3, assessment: "Critical: large tree limb over active playground, imminent fall risk to children" },
       { caseid: 14892265, district: "3", neighborhood: "SoMa", category: "Damaged Property", description: "Deep pothole on Market causing cars to swerve", ai_image_severity: 4, ai_severity_gap: 2, assessment: "High: road crater with exposed rebar forcing cyclists into traffic lane" },
