@@ -560,10 +560,10 @@ export default function SF311Demo() {
         <div style={inner}>
           <Badge color={C.cyan}>Live Demo · Snowflake Cortex AI Functions</Badge>
           <h1 style={{ fontSize: 52, fontWeight: 700, lineHeight: 1.1, marginTop: 24, marginBottom: 20, letterSpacing: -1.5, maxWidth: 800, background: `linear-gradient(135deg, ${C.white} 0%, ${C.ice} 100%)`, WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}>
-            SQL that can see images, read text, and classify data — without leaving your warehouse.
+            SQL that can see images, read text, and classify data. Without leaving your warehouse.
           </h1>
           <p style={{ fontSize: 17, color: C.gray, maxWidth: 620, lineHeight: 1.75, marginBottom: 32 }}>
-            Cortex AI Functions let any analyst run image analysis, sentiment scoring, and classification directly in SQL — no Python, no external APIs. Every query on this page executes live against a real SF 311 dataset as an example use case.
+            Cortex AI Functions let any analyst run image analysis, sentiment scoring, and classification directly in SQL. No Python, no external APIs. Every query on this page executes live against a real SF 311 dataset as an example use case.
           </p>
           <ul style={{ listStyle: "none", padding: 0, margin: "0 0 48px 0", display: "flex", flexDirection: "column", gap: 8 }}>
             {[
@@ -727,7 +727,7 @@ export default function SF311Demo() {
                   <div ref={resultsRef} style={{ marginTop: 14, borderRadius: 8, overflow: "hidden" }}>
                     <div style={{ height: 4, background: `linear-gradient(90deg, transparent, ${C.ice}, transparent)`, backgroundSize: "200% 100%", animation: "shimmer 1.4s infinite" }} />
                     <div style={{ padding: "12px 14px", background: "rgba(41,182,246,0.04)", border: `1px solid rgba(41,182,246,0.1)`, borderTop: "none", borderRadius: "0 0 8px 8px", fontSize: 12.5, color: querySlow ? C.amber : C.ice }}>
-                      {querySlow ? "Query is taking longer than expected — Snowflake is still running..." : "Connecting to Snowflake, executing AI functions, assembling results..."}
+                      {querySlow ? "Query is taking longer than expected. Snowflake is still running..." : "Connecting to Snowflake, executing AI functions, assembling results..."}
                     </div>
                   </div>
                 )}
@@ -830,7 +830,7 @@ export default function SF311Demo() {
               )}
               {textSlow && textRunning && (
                 <div style={{ marginLeft: 40, padding: "7px 12px", background: "rgba(255,171,64,0.06)", border: "1px solid rgba(255,171,64,0.2)", borderRadius: 7, fontSize: 12, color: C.amber, marginBottom: 8 }}>
-                  Query is taking longer than expected — Snowflake is still running...
+                  Query is taking longer than expected. Snowflake is still running...
                 </div>
               )}
               <ProcessStep label="Executing against Snowflake..."
