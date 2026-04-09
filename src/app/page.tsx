@@ -625,6 +625,17 @@ export default function SF311Demo() {
             ))}
           </div>
           <div style={{ background: C.surface, borderRadius: 12, overflow: "hidden", border: "1px solid rgba(41,182,246,0.08)" }}>
+            <div style={{ padding: "8px 14px 6px", borderBottom: "1px solid rgba(41,182,246,0.06)", display: "flex", gap: 18, flexWrap: "wrap" }}>
+              {[
+                { label: "AI Theme", desc: "AI_CLASSIFY on complaint text" },
+                { label: "Sentiment", desc: "AI_SENTIMENT score, negative = frustrated" },
+                { label: "Img Sev.", desc: "AI vision rating 1 (minor) to 5 (hazard)" },
+              ].map(({ label, desc }) => (
+                <span key={label} style={{ fontSize: 10.5, color: C.gray }}>
+                  <span style={{ color: C.ice, fontWeight: 600 }}>{label}</span>{" "}{desc}
+                </span>
+              ))}
+            </div>
             <div style={{ overflowX: "auto" }}>
               <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 12.5 }}>
                 <thead>
