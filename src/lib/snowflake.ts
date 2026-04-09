@@ -25,14 +25,14 @@ export async function executeQuery(
 ): Promise<Record<string, unknown>[]> {
   return new Promise((resolve, reject) => {
     const connection = snowflake.createConnection({
-      account: process.env.SNOWFLAKE_ACCOUNT!,
-      username: process.env.SNOWFLAKE_USERNAME!,
+      account: process.env.SNOWFLAKE_ACCOUNT!.trim(),
+      username: process.env.SNOWFLAKE_USERNAME!.trim(),
       authenticator: "SNOWFLAKE_JWT",
       privateKey: getPrivateKey(),
-      database: process.env.SNOWFLAKE_DATABASE!,
-      schema: process.env.SNOWFLAKE_SCHEMA!,
-      warehouse: process.env.SNOWFLAKE_WAREHOUSE!,
-      role: process.env.SNOWFLAKE_ROLE!,
+      database: process.env.SNOWFLAKE_DATABASE!.trim(),
+      schema: process.env.SNOWFLAKE_SCHEMA!.trim(),
+      warehouse: process.env.SNOWFLAKE_WAREHOUSE!.trim(),
+      role: process.env.SNOWFLAKE_ROLE!.trim(),
     });
 
     connection.connect((err) => {
