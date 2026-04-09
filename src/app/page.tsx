@@ -412,6 +412,24 @@ function Lightbox({ src, onClose }: { src: string; onClose: () => void }) {
   );
 }
 
+function Pagination({ page, total, perPage, onChange, dark = false }: { page: number; total: number; perPage: number; onChange: (p: number) => void; dark?: boolean }) {
+  const totalPages = Math.ceil(total / perPage);
+  if (totalPages <= 1) return null;
+  const btn = (disabled: boolean, label: string, onClick: () => void): React.CSSProperties => ({
+    padding: "4px 12px", borderRadius: 6, border: `1px solid ${dark ? "rgba(41,182,246,0.2)" : "#d8dfe8"}`,
+    background: disabled ? "transparent" : dark ? "rgba(41,182,246,0.08)" : "#f0f4f8",
+    color: disabled ? (dark ? C.grayDark : "#bbc8d4") : dark ? C.ice : C.navy,
+    fontSize: 12, fontWeight: 600, cursor: disabled ? "default" : "pointer", fontFamily: "inherit",
+  });
+  return (
+    <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 10, padding: "10px 0" }}>
+      <button style={btn(page === 1, "<", () => {})} disabled={page === 1} onClick={() => onChange(page - 1)}>{"<"}</button>
+      <span style={{ fontSize: 12, color: dark ? C.gray : C.grayDark, minWidth: 80, textAlign: "center" }}>Page {page} of {totalPages}</span>
+      <button style={btn(page === totalPages, ">", () => {})} disabled={page === totalPages} onClick={() => onChange(page + 1)}>{">"}</button>
+    </div>
+  );
+}
+
 function useFadeInSection() {
   const ref = useRef<HTMLElement>(null);
   useEffect(() => {
@@ -456,10 +474,11 @@ export default function SF311Demo() {
     sql: string; functions: string[]; results: Record<string, unknown>[]; executionTime: string;
   } | null>(null);
 
-  const [queryResultsExpanded, setQueryResultsExpanded] = useState(false);
-  const [textResultsExpanded, setTextResultsExpanded] = useState(false);
   const [querySlow, setQuerySlow] = useState(false);
   const [textSlow, setTextSlow] = useState(false);
+  const [datasetPage, setDatasetPage] = useState(1);
+  const [queryPage, setQueryPage] = useState(1);
+  const [textPage, setTextPage] = useState(1);
 
   const [stats, setStats] = useState<Record<string, string> | null>(null);
   const [previewData, setPreviewData] = useState<SampleRow[]>(SAMPLE_DATA);
@@ -482,6 +501,7 @@ export default function SF311Demo() {
     setQueryDone(false);
     setQueryResults(null);
     setQuerySlow(false);
+    setQueryPage(1);
     setTimeout(() => resultsRef.current?.scrollIntoView({ behavior: "smooth", block: "nearest" }), 80);
     const slowTimer = setTimeout(() => setQuerySlow(true), 10000);
     try {
@@ -509,8 +529,8 @@ export default function SF311Demo() {
     setTextRunning(true);
     setTextDone(false);
     setTextStep(0);
-    setTextResultsExpanded(false);
     setTextSlow(false);
+    setTextPage(1);
     const slowTimer = setTimeout(() => setTextSlow(true), 10000);
     const apiPromise = fetch("/api/text-to-sql", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ question }) }).then((r) => r.json()).catch(() => null);
     let step = 0;
@@ -615,7 +635,7 @@ export default function SF311Demo() {
                   </tr>
                 </thead>
                 <tbody>
-                  {previewData.slice(0, 6).map((r, i) => {
+                  {previewData.slice((datasetPage - 1) * 5, datasetPage * 5).map((r, i) => {
                     const row = r as Record<string, unknown>;
                     const id = row.id ?? row.caseid;
                     const date = String(row.date ?? "").slice(0, 10);
@@ -659,8 +679,11 @@ export default function SF311Demo() {
                 </tbody>
               </table>
             </div>
-            <div style={{ padding: "8px 12px", borderTop: "1px solid rgba(41,182,246,0.06)", fontSize: 11, color: C.grayDark }}>
-              Showing 6 of {stats?.totalCases ?? previewData.length} cases. Click any row to expand. Queried live from Snowflake.
+            <div style={{ padding: "4px 12px 0", borderTop: "1px solid rgba(41,182,246,0.06)" }}>
+              <Pagination page={datasetPage} total={previewData.length} perPage={5} onChange={setDatasetPage} dark />
+            </div>
+            <div style={{ padding: "4px 12px 8px", fontSize: 11, color: C.grayDark }}>
+              Showing {previewData.length} of {stats?.totalCases ?? previewData.length} cases. Click any row to expand. Queried live from Snowflake.
             </div>
           </div>
         </div>
@@ -674,7 +697,7 @@ export default function SF311Demo() {
           <p style={{ fontSize: 15, color: C.grayDark, marginBottom: 28, lineHeight: 1.6, maxWidth: 700 }}>Each card shows a real analytical question, what it used to take in Python, and the equivalent Cortex AI Functions query. You can execute them live against Snowflake.</p>
           <div style={{ display: "flex", gap: 10, marginBottom: 24, flexWrap: "wrap" }}>
             {ANALYSES.map((an, i) => (
-              <button key={i} onClick={() => { setActiveAnalysis(i); setQueryDone(false); setQueryRunning(false); setQueryResults(null); setQueryResultsExpanded(false); }}
+              <button key={i} onClick={() => { setActiveAnalysis(i); setQueryDone(false); setQueryRunning(false); setQueryResults(null); setQueryPage(1); }}
                 style={{ padding: "9px 16px", borderRadius: 10, border: activeAnalysis === i ? `2px solid ${C.ice}` : "1.5px solid #d8dfe8", background: activeAnalysis === i ? C.surface : "#fff", color: activeAnalysis === i ? C.ice : C.navy, fontWeight: 600, fontSize: 13, cursor: "pointer", fontFamily: "inherit", transition: "all 0.2s", display: "flex", alignItems: "center", gap: 7 }}>
                 <span>{an.icon}</span> {an.title}
               </button>
@@ -736,7 +759,7 @@ export default function SF311Demo() {
                 {queryDone && displayResults && (
                   <div ref={resultsRef} style={{ marginTop: 14 }}>
                     <div style={{ padding: "7px 12px", background: "rgba(0,229,195,0.05)", borderRadius: 8, marginBottom: 10, fontSize: 11.5, color: "#0a8a6f", border: "1px solid rgba(0,229,195,0.12)", display: "flex", justifyContent: "space-between", flexWrap: "wrap", gap: 6 }}>
-                      <span>✓ {displayResults.length} rows returned</span>
+                      <span>Showing {Math.min((queryPage - 1) * 4 + 1, displayResults.length)} to {Math.min(queryPage * 4, displayResults.length)} of {displayResults.length} results</span>
                       <span>Execution: {queryTime}s · Warehouse: COMPUTE_WH</span>
                     </div>
                     <div style={{ overflowX: "auto" }}>
@@ -751,7 +774,7 @@ export default function SF311Demo() {
                           </tr>
                         </thead>
                         <tbody>
-                          {(queryResultsExpanded ? displayResults : displayResults.slice(0, 5)).map((row, i) => (
+                          {displayResults.slice((queryPage - 1) * 4, queryPage * 4).map((row, i) => (
                             <tr key={i} style={{ borderBottom: "1px solid #f0f2f5" }}>
                               {Object.entries(row).map(([k, v], j) => (
                                 <td key={j} style={{ padding: "7px 8px", color: C.navy, fontSize: 11.5, maxWidth: 200, lineHeight: 1.4 }}>
@@ -763,13 +786,8 @@ export default function SF311Demo() {
                         </tbody>
                       </table>
                     </div>
-                    {displayResults.length > 5 && (
-                      <button onClick={() => setQueryResultsExpanded(!queryResultsExpanded)}
-                        style={{ marginTop: 8, width: "100%", padding: "7px 12px", borderRadius: 7, border: "1px solid #d8dfe8", background: "#f8fafc", color: C.grayDark, fontSize: 12, cursor: "pointer", fontFamily: "inherit", fontWeight: 600 }}>
-                        {queryResultsExpanded ? `Collapse ▲` : `Show ${displayResults.length - 5} more rows ▼`}
-                      </button>
-                    )}
-                    <div style={{ marginTop: 10, padding: "9px 12px", background: "rgba(0,229,195,0.04)", borderRadius: 8, fontSize: 12, color: C.grayDark, border: "1px solid rgba(0,229,195,0.08)", display: "flex", gap: 20, flexWrap: "wrap" }}>
+                    <Pagination page={queryPage} total={displayResults.length} perPage={4} onChange={setQueryPage} />
+                    <div style={{ marginTop: 8, padding: "9px 12px", background: "rgba(0,229,195,0.04)", borderRadius: 8, fontSize: 12, color: C.grayDark, border: "1px solid rgba(0,229,195,0.08)", display: "flex", gap: 20, flexWrap: "wrap" }}>
                       <span>Python approach: <strong style={{ color: C.red }}>{a.oldWay.lines} lines</strong></span>
                       <span>Cortex AI SQL: <strong style={{ color: C.cyan }}>{a.aiSqlLines} lines</strong></span>
                       <span style={{ color: C.cyan }}>{Math.round(a.oldWay.lines / a.aiSqlLines)}x fewer lines of code</span>
@@ -839,8 +857,8 @@ export default function SF311Demo() {
 
               {textDone && textDisplayResults && (
                 <div style={{ marginTop: 16 }}>
-                  <div style={{ padding: "7px 12px", background: "rgba(0,229,195,0.05)", borderRadius: 8, fontSize: 11.5, color: C.cyan, border: "1px solid rgba(0,229,195,0.12)", marginBottom: 12, display: "flex", gap: 16, flexWrap: "wrap" }}>
-                    <span>Complete</span>
+                  <div style={{ padding: "7px 12px", background: "rgba(0,229,195,0.05)", borderRadius: 8, fontSize: 11.5, color: C.cyan, border: "1px solid rgba(0,229,195,0.12)", marginBottom: 12, display: "flex", justifyContent: "space-between", flexWrap: "wrap", gap: 6 }}>
+                    <span>Showing {Math.min((textPage - 1) * 4 + 1, textDisplayResults.length)} to {Math.min(textPage * 4, textDisplayResults.length)} of {textDisplayResults.length} results</span>
                     <span>Functions: {(textApiResult?.functions ?? textAnalysis.functions).join(", ")}</span>
                   </div>
                   <div style={{ overflowX: "auto" }}>
@@ -855,7 +873,7 @@ export default function SF311Demo() {
                         </tr>
                       </thead>
                       <tbody>
-                        {(textResultsExpanded ? textDisplayResults : (textDisplayResults as Record<string, unknown>[]).slice(0, 5)).map((row, i) => (
+                        {(textDisplayResults as Record<string, unknown>[]).slice((textPage - 1) * 4, textPage * 4).map((row, i) => (
                           <tr key={i} style={{ borderBottom: "1px solid rgba(255,255,255,0.03)" }}>
                             {Object.entries(row as Record<string, unknown>).map(([k, v], j) => (
                               <td key={j} style={{ padding: "7px 8px", color: C.grayLight, fontSize: 12, maxWidth: 200, lineHeight: 1.4 }}>
@@ -867,12 +885,7 @@ export default function SF311Demo() {
                       </tbody>
                     </table>
                   </div>
-                  {textDisplayResults.length > 5 && (
-                    <button onClick={() => setTextResultsExpanded(!textResultsExpanded)}
-                      style={{ marginTop: 8, width: "100%", padding: "7px 12px", borderRadius: 7, border: "1px solid rgba(41,182,246,0.15)", background: "rgba(41,182,246,0.04)", color: C.gray, fontSize: 12, cursor: "pointer", fontFamily: "inherit", fontWeight: 600 }}>
-                      {textResultsExpanded ? `Collapse ▲` : `Show ${textDisplayResults.length - 5} more rows ▼`}
-                    </button>
-                  )}
+                  <Pagination page={textPage} total={textDisplayResults.length} perPage={4} onChange={setTextPage} dark />
                 </div>
               )}
             </div>
