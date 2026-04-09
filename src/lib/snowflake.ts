@@ -6,7 +6,14 @@ snowflake.configure({ logLevel: "ERROR" });
 function getPrivateKey(): string {
   // Vercel: key content stored directly in env var
   const keyContent = process.env.SNOWFLAKE_PRIVATE_KEY;
-  if (keyContent) return keyContent.replace(/\\n/g, "\n");
+  if (keyContent) {
+    const key = keyContent.replace(/\\n/g, "\n").trim();
+    // Already full PEM — return as-is
+    if (key.startsWith("-----")) return key;
+    // Raw base64 (no headers) — wrap in PKCS8 PEM with proper 64-char line breaks
+    const body = key.replace(/\s+/g, "").match(/.{1,64}/g)?.join("\n") ?? key;
+    return `-----BEGIN PRIVATE KEY-----\n${body}\n-----END PRIVATE KEY-----\n`;
+  }
   // Local dev: read from file path
   const path = process.env.SNOWFLAKE_PRIVATE_KEY_PATH;
   if (path) return fs.readFileSync(path, "utf8");
