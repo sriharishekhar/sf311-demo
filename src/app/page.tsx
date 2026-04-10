@@ -694,7 +694,7 @@ export default function SF311Demo() {
               <Pagination page={datasetPage} total={previewData.length} perPage={5} onChange={setDatasetPage} dark />
             </div>
             <div style={{ padding: "4px 12px 8px", fontSize: 11, color: C.grayDark }}>
-              Showing {previewData.length} of {stats?.totalCases ?? previewData.length} cases. Click any row to expand. Queried live from Snowflake.
+              Showing {previewData.length} of {stats?.totalCases ?? previewData.length} cases. Click any row to expand. Queried live from Snowflake. AI enrichment was run once using Cortex AI Functions and stored as columns. The queries shown execute live against those enriched results.
             </div>
           </div>
         </div>
