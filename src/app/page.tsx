@@ -277,14 +277,15 @@ function DataTable({
         </table>
       </div>
       <div style={{ borderTop: "1px solid rgba(41,182,246,0.06)", display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: 8 }}>
-        <span style={{ padding: "8px 14px", fontSize: 11, color: C.grayDark }}>Click rows to expand. {showAI ? "Queried live from Snowflake." : ""}</span>
-        <Pagination page={page} total={data.length} perPage={rpp} onChange={setPage} dark />
+        <span style={{ padding: "8px 14px", fontSize: 11, color: C.grayDark }}>Click rows to expand. Queried live from Snowflake.</span>
+        <Pagination page={page} total={data.length} perPage={rpp} onChange={(p) => { setExpanded(null); setPage(p); }} dark />
       </div>
     </div>
   );
 }
 
 function ResultsTable({ rows, page, setPage }: { rows: Record<string, unknown>[]; page: number; setPage: (p: number) => void }) {
+  if (!rows.length) return null;
   const perPage = 5;
   const paged = rows.slice(page * perPage, page * perPage + perPage);
   return (
@@ -335,7 +336,8 @@ export default function SF311Demo() {
   const [showEnrichedData, setShowEnrichedData] = useState(false);
   const [rawPage, setRawPage] = useState(0);
   const [enrichedPage, setEnrichedPage] = useState(0);
-  const [rawData, setRawData] = useState<SampleRow[]>(SAMPLE_DATA);
+  const [rawData, setRawData] = useState<SampleRow[]>([]);
+  const [rawLoading, setRawLoading] = useState(true);
   const [activeAnalysis, setActiveAnalysis] = useState(0);
   const [queryRunning, setQueryRunning] = useState(false);
   const [queryDone, setQueryDone] = useState(false);
@@ -345,13 +347,14 @@ export default function SF311Demo() {
   const [queryPage, setQueryPage] = useState(0);
   const [showAllCap, setShowAllCap] = useState(false);
   const [lightboxSrc, setLightboxSrc] = useState<string | null>(null);
-  const [previewData, setPreviewData] = useState<SampleRow[]>(SAMPLE_DATA);
+  const [previewData, setPreviewData] = useState<SampleRow[]>([]);
+  const [previewLoading, setPreviewLoading] = useState(true);
 
   const resultsRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    fetch("/api/preview").then((r) => r.json()).then((d) => { if (d.rows?.length > 0) setPreviewData(d.rows); }).catch(() => {});
-    fetch("/api/raw").then((r) => r.json()).then((d) => { if (d.rows?.length > 0) setRawData(d.rows); }).catch(() => {});
+    fetch("/api/preview").then((r) => r.json()).then((d) => { if (d.rows?.length > 0) setPreviewData(d.rows); }).catch(() => {}).finally(() => setPreviewLoading(false));
+    fetch("/api/raw").then((r) => r.json()).then((d) => { if (d.rows?.length > 0) setRawData(d.rows); }).catch(() => {}).finally(() => setRawLoading(false));
   }, []);
 
   const a = ANALYSES[activeAnalysis];
@@ -413,7 +416,9 @@ export default function SF311Demo() {
           </button>
 
           {showRawData && (
-            <DataTable data={rawData} page={rawPage} setPage={setRawPage} showAI={false} />
+            rawLoading
+              ? <div style={{ marginTop: 14, fontSize: 12, color: C.gray }}>Loading from Snowflake...</div>
+              : <DataTable data={rawData} page={rawPage} setPage={setRawPage} showAI={false} />
           )}
         </div>
       </section>
@@ -519,7 +524,9 @@ WHERE AI_FILTER(description,
           </button>
 
           {showEnrichedData && (
-            <DataTable data={previewData} page={enrichedPage} setPage={setEnrichedPage} showAI lightboxClick={setLightboxSrc} />
+            previewLoading
+              ? <div style={{ marginTop: 14, fontSize: 12, color: C.gray }}>Loading from Snowflake...</div>
+              : <DataTable data={previewData} page={enrichedPage} setPage={setEnrichedPage} showAI lightboxClick={setLightboxSrc} />
           )}
         </div>
       </section>
