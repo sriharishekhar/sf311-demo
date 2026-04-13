@@ -277,7 +277,7 @@ function DataTable({
         </table>
       </div>
       <div style={{ borderTop: "1px solid rgba(41,182,246,0.06)", display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: 8 }}>
-        <span style={{ padding: "8px 14px", fontSize: 11, color: C.grayDark }}>Queried live from Snowflake.</span>
+        <span />
         <Pagination page={page} total={data.length} perPage={rpp} onChange={(p) => { setExpanded(null); setPage(p); }} dark />
       </div>
     </div>
