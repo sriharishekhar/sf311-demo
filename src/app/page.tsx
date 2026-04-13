@@ -335,6 +335,7 @@ export default function SF311Demo() {
   const [showEnrichedData, setShowEnrichedData] = useState(false);
   const [rawPage, setRawPage] = useState(0);
   const [enrichedPage, setEnrichedPage] = useState(0);
+  const [rawData, setRawData] = useState<SampleRow[]>(SAMPLE_DATA);
   const [activeAnalysis, setActiveAnalysis] = useState(0);
   const [queryRunning, setQueryRunning] = useState(false);
   const [queryDone, setQueryDone] = useState(false);
@@ -350,6 +351,7 @@ export default function SF311Demo() {
 
   useEffect(() => {
     fetch("/api/preview").then((r) => r.json()).then((d) => { if (d.rows?.length > 0) setPreviewData(d.rows); }).catch(() => {});
+    fetch("/api/raw").then((r) => r.json()).then((d) => { if (d.rows?.length > 0) setRawData(d.rows); }).catch(() => {});
   }, []);
 
   const a = ANALYSES[activeAnalysis];
@@ -411,7 +413,7 @@ export default function SF311Demo() {
           </button>
 
           {showRawData && (
-            <DataTable data={SAMPLE_DATA} page={rawPage} setPage={setRawPage} showAI={false} />
+            <DataTable data={rawData} page={rawPage} setPage={setRawPage} showAI={false} />
           )}
         </div>
       </section>
