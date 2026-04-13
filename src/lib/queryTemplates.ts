@@ -47,22 +47,22 @@ LIMIT 25`,
     ],
   },
 
-  equity: {
-    id: "equity",
-    sql: `SELECT neighborhood, district,
-  complaint_volume,
-  ROUND(avg_visual_severity, 2) AS avg_visual_severity,
-  ROUND(avg_text_severity, 2) AS avg_text_severity,
-  safety_count,
-  equity_flag
-FROM neighborhood_equity
-ORDER BY
-  CASE WHEN equity_flag = 'Potentially Underreported' THEN 0 ELSE 1 END,
-  avg_visual_severity DESC`,
-    functions: ["AI_COMPLETE (image severity)", "AI_SENTIMENT", "Aggregation + equity logic"],
+  sentiment_by_district: {
+    id: "sentiment_by_district",
+    sql: `SELECT district,
+  COUNT(*) AS total_cases,
+  ROUND(AVG(ai_sentiment), 3) AS avg_sentiment,
+  SUM(CASE WHEN ai_sentiment < -0.5 THEN 1 ELSE 0 END) AS highly_negative
+FROM cases_enriched
+GROUP BY district
+ORDER BY avg_sentiment ASC`,
+    functions: ["AI_SENTIMENT", "Aggregation by district"],
     fallbackResults: [
-      { neighborhood: "Bayview", district: "10", complaint_volume: 38, avg_visual_severity: 4.2, avg_text_severity: 2.8, safety_count: 12, equity_flag: "Potentially Underreported" },
-      { neighborhood: "Excelsior", district: "11", complaint_volume: 29, avg_visual_severity: 3.8, avg_text_severity: 2.5, safety_count: 8, equity_flag: "Potentially Underreported" },
+      { district: "6", total_cases: 612, avg_sentiment: -0.74, highly_negative: 489 },
+      { district: "9", total_cases: 543, avg_sentiment: -0.68, highly_negative: 421 },
+      { district: "3", total_cases: 498, avg_sentiment: -0.61, highly_negative: 372 },
+      { district: "5", total_cases: 441, avg_sentiment: -0.55, highly_negative: 298 },
+      { district: "10", total_cases: 387, avg_sentiment: -0.52, highly_negative: 241 },
     ],
   },
 
